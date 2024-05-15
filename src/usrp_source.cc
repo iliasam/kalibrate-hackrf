@@ -229,10 +229,10 @@ usrp_source::open (unsigned int subdev)
 {
   int i, r, device_count, count;
   uint32_t dev_index = subdev;
-  uint32_t samp_rate;
+  uint32_t samp_rate_hz;
 
-  samp_rate = m_fpga_master_clock_freq; // from constructor
-  m_sample_rate = 1000000;
+  samp_rate_hz = m_fpga_master_clock_freq; // from constructor, 1MHz by default
+  m_sample_rate = m_fpga_master_clock_freq;
 
 
   if (g_verbosity)
@@ -254,9 +254,9 @@ usrp_source::open (unsigned int subdev)
     }
 
   /* Set the sample rate */
-  r = hackrf_set_sample_rate (dev, samp_rate);
+  r = hackrf_set_sample_rate (dev, samp_rate_hz);
   if (g_verbosity)
-    printf ("hackrf_set_sample_rate(%u)\n", samp_rate);
+    printf ("hackrf_set_sample_rate(%u)\n", samp_rate_hz);
   if (r != HACKRF_SUCCESS)
     fprintf (stderr, "WARNING: Failed to set sample rate.\n");
 

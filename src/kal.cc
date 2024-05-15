@@ -101,6 +101,7 @@ usage (char *prog)
   printf ("\t-E\tmanual frequency offset in hz\n");
   printf ("\t-v\tverbose\n");
   printf ("\t-D\tenable debug messages\n");
+  printf ("\t-F\tSDR sample rate, hz\n");
   printf ("\t-h\thelp\n");
   exit (-1);
 }
@@ -114,12 +115,12 @@ main (int argc, char **argv)
   int c, bi = BI_NOT_DEFINED, chan = -1, bts_scan = 0;
   int ppm_error = 0, hz_adjust = 0;
   unsigned int subdev = 0, decimation = 29;
-  long int fpga_master_clock_freq = 8000000; // lowest rate supported
+  long int sample_rate_hz = 1e6; // 1MHz - lowest rate supported for HackRF
   int amp_gain = 0, lna_gain = 0, vga_gain = 0;
   double freq = -1.0, fd;
   usrp_source *u;
 
-  while ((c = getopt (argc, argv, "f:c:s:b:R:ag:l:e:E:d:vDh?")) != EOF)
+  while ((c = getopt (argc, argv, "f:c:s:b:R:ag:l:e:E:F:d:vDh?")) != EOF)
     {
       switch (c)
 	{
@@ -183,14 +184,14 @@ main (int argc, char **argv)
 	  break;
 
 	case 'F':
-	  fpga_master_clock_freq = strtol (optarg, 0, 0);
-	  if (!fpga_master_clock_freq)
-	    fpga_master_clock_freq = (long int) strtod (optarg, 0);
+	  sample_rate_hz = strtol (optarg, 0, 0);
+	  if (!sample_rate_hz)
+	    sample_rate_hz = (long int) strtod (optarg, 0);
 
 	  // was answer in MHz?
-	  if (fpga_master_clock_freq < 1000)
+	  if (sample_rate_hz < 1000)
 	    {
-	      fpga_master_clock_freq *= 1000000;
+	      sample_rate_hz *= 1000000;
 	    }
 	  break;
 
@@ -253,15 +254,14 @@ main (int argc, char **argv)
     }
 
   // calculate decimation -- get as close to GSM rate as we can
-  fd = (double) fpga_master_clock_freq / GSM_RATE;
+  fd = (double) sample_rate_hz / GSM_RATE;
   decimation = (unsigned int) fd;
   if (g_debug)
     {
 #ifdef D_HOST_OSX
       printf ("debug: Mac OS X version\n");
 #endif
-      printf ("debug: FPGA Master Clock Freq:\t%li\n",
-	      fpga_master_clock_freq);
+      printf ("debug: Sample rate Freq:\t%li Hz\n", sample_rate_hz);
       printf ("debug: decimation            :\t%u\n", decimation);
       printf ("debug: RX Subdev Spec        :\t%s\n", subdev ? "B" : "A");
       printf ("debug: RF Amp                :\t%s\n",
@@ -270,7 +270,7 @@ main (int argc, char **argv)
       printf ("debug: VGA (BB) Gain         :\t%d\n", vga_gain);
     }
 
-  u = new usrp_source (decimation, fpga_master_clock_freq);
+  u = new usrp_source (decimation, sample_rate_hz);
   if (!u)
     {
       fprintf (stderr, "error: usrp_source\n");
