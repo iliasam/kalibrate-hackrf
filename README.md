@@ -10,6 +10,8 @@ to support the [HackRF](https://greatscottgadgets.com/hackrf/).
 The documentation below is adapted from the original website at
 [http://thre.at/kalibrate](https://web.archive.org/web/20131226204943/http://thre.at/kalibrate)
 (defunct since 2013).
+  
+By iliasam: this is pathched varian of this utility: https://github.com/scateu/kalibrate-hackrf/issues/6#issuecomment-2111687317  
 
 
 ## On Clocks
